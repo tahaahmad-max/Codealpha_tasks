@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ShopEase - Your one-stop online store for quality products at great prices.">
+    <title>{% block title %}ShopEase{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Our main CSS file -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- ============================
+         NAVIGATION BAR
+    ============================= -->
+    <nav class="navbar">
+        <div class="container navbar-inner">
+
+            <!-- Store logo / name -->
+            <a href="{% url 'home' %}" class="navbar-brand">
+                <span class="brand-icon">🛍️</span>
+                ShopEase
+            </a>
+
+            <!-- Hamburger button for mobile -->
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+
+            <!-- Navigation links -->
+            <ul class="nav-links" id="navLinks">
+                <li><a href="{% url 'home' %}">Home</a></li>
+
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'order_list' %}">My Orders</a></li>
+                    <li>
+                        <a href="{% url 'cart' %}" class="cart-link">
+                            🛒 Cart
+                            {% if cart_count > 0 %}
+                                <span class="cart-badge">{{ cart_count }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li class="nav-dropdown">
+                        <span class="nav-username">👤 {{ user.username }}</span>
+                        <ul class="dropdown-menu">
+                            <li><a href="{% url 'order_list' %}">My Orders</a></li>
+                            <li><a href="{% url 'logout' %}">Logout</a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li>
+                        <a href="{% url 'cart' %}" class="cart-link">
+                            🛒 Cart
+                            {% if cart_count > 0 %}
+                                <span class="cart-badge">{{ cart_count }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li><a href="{% url 'login' %}" class="btn btn-outline">Login</a></li>
+                    <li><a href="{% url 'register' %}" class="btn btn-primary">Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ============================
+         FLASH MESSAGES
+    ============================= -->
+    {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                    <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- ============================
+         MAIN CONTENT
+    ============================= -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ============================
+         FOOTER
+    ============================= -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>🛍️ ShopEase</h3>
+                    <p>Your one-stop online store for quality products at great prices.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="{% url 'home' %}">Home</a></li>
+                        <li><a href="{% url 'cart' %}">Shopping Cart</a></li>
+                        {% if user.is_authenticated %}
+                            <li><a href="{% url 'order_list' %}">My Orders</a></li>
+                        {% else %}
+                            <li><a href="{% url 'login' %}">Login</a></li>
+                            <li><a href="{% url 'register' %}">Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <p>📧 support@shopease.com</p>
+                    <p>📞 +1 (800) 123-4567</p>
+                    <p>🕐 Mon–Fri, 9am–6pm</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 ShopEase. All rights reserved. Built with Django 🐍</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Our JavaScript file -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

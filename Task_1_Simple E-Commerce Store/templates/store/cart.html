@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}Shopping Cart – ShopEase{% endblock %}
+
+{% block content %}
+<div class="container section">
+
+    <div class="section-header">
+        <h1>🛒 Shopping Cart</h1>
+    </div>
+
+    {% if cart|length > 0 %}
+    <div class="cart-layout">
+
+        <!-- Cart Items Table -->
+        <div class="cart-items">
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Subtotal</th>
+                        <th>Remove</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart %}
+                    <tr class="cart-row">
+                        <!-- Product image + name -->
+                        <td class="cart-product-cell">
+                            {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="cart-thumbnail">
+                            {% else %}
+                                <div class="cart-thumb-placeholder">📦</div>
+                            {% endif %}
+                            <a href="{% url 'product_detail' item.product.id %}">{{ item.product.name }}</a>
+                        </td>
+
+                        <!-- Unit price -->
+                        <td class="cart-price">${{ item.price }}</td>
+
+                        <!-- Quantity update form -->
+                        <td class="cart-qty-cell">
+                            <form method="POST" action="{% url 'cart_update' item.product.id %}" class="qty-form">
+                                {% csrf_token %}
+                                <div class="quantity-control qty-small">
+                                    <button type="button" class="qty-btn" onclick="changeQty(this, -1)">−</button>
+                                    <input
+                                        type="number"
+                                        name="quantity"
+                                        value="{{ item.quantity }}"
+                                        min="1"
+                                        class="qty-input"
+                                        onchange="this.closest('form').submit()"
+                                    >
+                                    <button type="button" class="qty-btn" onclick="changeQty(this, 1)">+</button>
+                                </div>
+                            </form>
+                        </td>
+
+                        <!-- Subtotal -->
+                        <td class="cart-subtotal">${{ item.subtotal }}</td>
+
+                        <!-- Remove button -->
+                        <td class="cart-remove-cell">
+                            <a href="{% url 'cart_remove' item.product.id %}"
+                               class="remove-btn"
+                               onclick="return confirm('Remove {{ item.product.name }} from cart?')">
+                                ✕
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Back to shopping link -->
+            <div class="cart-bottom-links">
+                <a href="{% url 'home' %}" class="btn btn-outline">← Continue Shopping</a>
+            </div>
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <aside class="cart-summary">
+            <h3>Order Summary</h3>
+
+            <div class="summary-row">
+                <span>Items ({{ cart|length }})</span>
+                <span>${{ cart.get_total_price }}</span>
+            </div>
+            <div class="summary-row">
+                <span>Shipping</span>
+                <span class="free-shipping">FREE</span>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-row summary-total">
+                <strong>Total</strong>
+                <strong>${{ cart.get_total_price }}</strong>
+            </div>
+
+            {% if user.is_authenticated %}
+                <a href="{% url 'checkout' %}" class="btn btn-primary btn-block">
+                    Proceed to Checkout →
+                </a>
+            {% else %}
+                <p class="login-notice">
+                    Please <a href="{% url 'login' %}?next={% url 'checkout' %}">login</a>
+                    or <a href="{% url 'register' %}">create an account</a> to checkout.
+                </p>
+                <a href="{% url 'login' %}?next={% url 'checkout' %}" class="btn btn-primary btn-block">
+                    Login to Checkout
+                </a>
+            {% endif %}
+        </aside>
+    </div>
+
+    {% else %}
+        <!-- Empty cart state -->
+        <div class="empty-state">
+            <p class="empty-icon">🛒</p>
+            <h2>Your cart is empty</h2>
+            <p>Looks like you haven't added anything yet.</p>
+            <a href="{% url 'home' %}" class="btn btn-primary btn-lg">Start Shopping</a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Increment or decrement quantity input and auto-submit the form
+    function changeQty(btn, delta) {
+        const input = btn.closest('.quantity-control').querySelector('input');
+        const newVal = Math.max(1, parseInt(input.value) + delta);
+        input.value = newVal;
+        btn.closest('form').submit();
+    }
+</script>
+{% endblock %}

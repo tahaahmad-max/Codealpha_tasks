@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Confirmed! – ShopEase{% endblock %}
+
+{% block content %}
+<div class="container section">
+    <div class="confirmation-card">
+
+        <!-- Success animation -->
+        <div class="confirmation-icon">✅</div>
+
+        <h1>Order Placed Successfully!</h1>
+        <p class="confirmation-subtitle">
+            Thank you, <strong>{{ order.full_name }}</strong>!
+            Your order <strong>#{{ order.id }}</strong> has been received.
+        </p>
+
+        <!-- Order summary -->
+        <div class="confirmation-details">
+            <div class="detail-row">
+                <span>Order ID</span>
+                <span>#{{ order.id }}</span>
+            </div>
+            <div class="detail-row">
+                <span>Date</span>
+                <span>{{ order.created_at|date:"F j, Y" }}</span>
+            </div>
+            <div class="detail-row">
+                <span>Status</span>
+                <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+            </div>
+            <div class="detail-row">
+                <span>Email</span>
+                <span>{{ order.email }}</span>
+            </div>
+            <div class="detail-row">
+                <span>Shipping to</span>
+                <span>{{ order.address }}, {{ order.city }}, {{ order.zip_code }}</span>
+            </div>
+        </div>
+
+        <!-- Items ordered -->
+        <div class="confirmation-items">
+            <h3>Items Ordered</h3>
+            {% for item in order.items.all %}
+            <div class="conf-item">
+                <span>{{ item.product.name }} × {{ item.quantity }}</span>
+                <span>${{ item.subtotal }}</span>
+            </div>
+            {% endfor %}
+            <div class="conf-total">
+                <strong>Total Paid</strong>
+                <strong>${{ order.total_price }}</strong>
+            </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="confirmation-actions">
+            <a href="{% url 'order_list' %}" class="btn btn-outline">View All Orders</a>
+            <a href="{% url 'home' %}" class="btn btn-primary">Continue Shopping</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

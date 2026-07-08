@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout – ShopEase{% endblock %}
+
+{% block content %}
+<div class="container section">
+
+    <div class="section-header">
+        <h1>Checkout</h1>
+        <p>Almost there! Fill in your shipping details.</p>
+    </div>
+
+    <div class="checkout-layout">
+
+        <!-- Left: Shipping Form -->
+        <div class="checkout-form-wrap">
+            <h2>Shipping Information</h2>
+
+            <form method="POST" action="{% url 'checkout' %}" id="checkoutForm">
+                {% csrf_token %}
+
+                <!-- Display any form errors -->
+                {% if form.non_field_errors %}
+                    <div class="form-errors">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="form-grid">
+                    <!-- Full Name -->
+                    <div class="form-group">
+                        <label for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }}</label>
+                        {{ form.full_name }}
+                        {% if form.full_name.errors %}
+                            <span class="field-error">{{ form.full_name.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <span class="field-error">{{ form.email.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="form-group">
+                        <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+                        {{ form.phone }}
+                    </div>
+
+                    <!-- Address (full width) -->
+                    <div class="form-group form-group-full">
+                        <label for="{{ form.address.id_for_label }}">{{ form.address.label }}</label>
+                        {{ form.address }}
+                        {% if form.address.errors %}
+                            <span class="field-error">{{ form.address.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- City -->
+                    <div class="form-group">
+                        <label for="{{ form.city.id_for_label }}">{{ form.city.label }}</label>
+                        {{ form.city }}
+                        {% if form.city.errors %}
+                            <span class="field-error">{{ form.city.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- ZIP Code -->
+                    <div class="form-group">
+                        <label for="{{ form.zip_code.id_for_label }}">{{ form.zip_code.label }}</label>
+                        {{ form.zip_code }}
+                        {% if form.zip_code.errors %}
+                            <span class="field-error">{{ form.zip_code.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Payment placeholder (for demo purposes) -->
+                <div class="payment-section">
+                    <h3>💳 Payment</h3>
+                    <div class="demo-payment">
+                        <p>🔒 This is a demo store. No real payment is processed.</p>
+                        <p>Click "Place Order" to confirm your order.</p>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg btn-block">
+                    ✅ Place Order
+                </button>
+            </form>
+        </div>
+
+        <!-- Right: Order Summary -->
+        <aside class="checkout-summary">
+            <h3>Your Order</h3>
+
+            <div class="checkout-items">
+                {% for item in cart %}
+                <div class="checkout-item">
+                    <div class="checkout-item-info">
+                        <span class="checkout-item-name">{{ item.product.name }}</span>
+                        <span class="checkout-item-qty">× {{ item.quantity }}</span>
+                    </div>
+                    <span class="checkout-item-price">${{ item.subtotal }}</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="summary-divider"></div>
+            <div class="summary-row summary-total">
+                <strong>Total</strong>
+                <strong>${{ cart.get_total_price }}</strong>
+            </div>
+        </aside>
+
+    </div>
+</div>
+{% endblock %}
