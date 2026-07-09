@@ -1,0 +1,123 @@
+{% extends 'core/base.html' %}
+{% block title %}Post by {{ post.author.username }} – ConnectHub{% endblock %}
+
+{% block content %}
+<div class="detail-layout">
+
+    <!-- ── Post Card ── -->
+    <article class="post-card post-card-detail">
+
+        <!-- Header -->
+        <div class="post-header">
+            <a href="{% url 'profile' post.author.username %}" class="post-author-link">
+                {% with pap=post.author.profile %}
+                {% if pap and pap.profile_pic %}
+                    <img src="{{ pap.profile_pic.url }}"
+                         alt="{{ post.author.username }}" class="avatar-sm" />
+                {% else %}
+                    <div class="avatar-placeholder-sm">{{ post.author.username|first|upper }}</div>
+                {% endif %}
+                {% endwith %}
+                <div>
+                    <span class="post-username">{{ post.author.username }}</span>
+                    <span class="post-date">{{ post.created_at|date:"F j, Y, g:i a" }}</span>
+                </div>
+            </a>
+
+            {% if user == post.author %}
+            <div class="post-actions-right">
+                <a href="{% url 'edit_post' post.id %}"   class="btn btn-outline btn-sm">&#9998; Edit</a>
+                <a href="{% url 'delete_post' post.id %}" class="btn btn-danger btn-sm">&#128465; Delete</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Image -->
+        {% if post.image %}
+        <div class="post-image-wrapper">
+            <img src="{{ post.image.url }}" alt="Post image" class="post-image" />
+        </div>
+        {% endif %}
+
+        <!-- Caption -->
+        <div class="post-body">
+            <p class="post-caption">{{ post.caption }}</p>
+        </div>
+
+        <!-- Like / Comment Counts -->
+        <div class="post-actions">
+            {% if user.is_authenticated %}
+            <button class="action-btn like-btn {% if is_liked %}liked{% endif %}"
+                    data-post-id="{{ post.id }}"
+                    onclick="toggleLike({{ post.id }}, this)">
+                <span class="like-icon">{% if is_liked %}&#10084;{% else %}&#9825;{% endif %}</span>
+                <span class="like-count" id="like-count-{{ post.id }}">{{ likes_count }}</span>
+            </button>
+            {% else %}
+            <a href="{% url 'login' %}" class="action-btn">&#9825; {{ likes_count }}</a>
+            {% endif %}
+
+            <span class="action-btn">&#128172; {{ comments|length }}</span>
+        </div>
+    </article>
+
+    <!-- ── Comments Section ── -->
+    <section class="comments-section">
+        <h2 class="section-title">Comments ({{ comments|length }})</h2>
+
+        <!-- Add Comment Form -->
+        {% if user.is_authenticated %}
+        <form action="{% url 'add_comment' post.id %}" method="POST" class="comment-form">
+            {% csrf_token %}
+            <div class="comment-input-row">
+                {% with profile=user.profile %}
+                {% if profile and profile.profile_pic %}
+                    <img src="{{ profile.profile_pic.url }}" alt="You" class="avatar-sm" />
+                {% else %}
+                    <div class="avatar-placeholder-sm">{{ user.username|first|upper }}</div>
+                {% endif %}
+                {% endwith %}
+                <input type="text" name="text" placeholder="Write a comment..." class="comment-input" required />
+                <button type="submit" class="btn btn-primary">Post</button>
+            </div>
+        </form>
+        {% else %}
+        <p class="text-muted"><a href="{% url 'login' %}">Login</a> to comment.</p>
+        {% endif %}
+
+        <!-- Comment List -->
+        <div class="comment-list">
+            {% for comment in comments %}
+            <div class="comment-item" id="comment-{{ comment.id }}">
+                <a href="{% url 'profile' comment.author.username %}" class="comment-avatar-link">
+                    {% with cprofile=comment.author.profile %}
+                    {% if cprofile and cprofile.profile_pic %}
+                        <img src="{{ cprofile.profile_pic.url }}"
+                             alt="{{ comment.author.username }}" class="avatar-sm" />
+                    {% else %}
+                        <div class="avatar-placeholder-sm">{{ comment.author.username|first|upper }}</div>
+                    {% endif %}
+                    {% endwith %}
+                </a>
+                <div class="comment-content">
+                    <div class="comment-header">
+                        <a href="{% url 'profile' comment.author.username %}" class="comment-username">
+                            {{ comment.author.username }}
+                        </a>
+                        <span class="comment-date">{{ comment.created_at|timesince }} ago</span>
+                        {% if user == comment.author %}
+                        <a href="{% url 'delete_comment' comment.id %}" class="comment-delete"
+                           onclick="return confirm('Delete this comment?')">✕</a>
+                        {% endif %}
+                    </div>
+                    <p class="comment-text">{{ comment.text }}</p>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted no-comments">No comments yet. Be the first!</p>
+            {% endfor %}
+        </div>
+    </section>
+
+</div>
+{% endblock %}

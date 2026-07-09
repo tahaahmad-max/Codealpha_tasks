@@ -1,0 +1,65 @@
+{% extends 'core/base.html' %}
+{% block title %}Create Post – ConnectHub{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-card">
+
+        <div class="form-card-header">
+            <h1>Create a Post</h1>
+            <p class="text-muted">Share something with the world</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="styled-form">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="id_caption">Caption</label>
+                <textarea id="id_caption" name="caption" class="form-input form-textarea"
+                          placeholder="What's on your mind?" rows="5" required>{{ form.caption.value|default:'' }}</textarea>
+                {% for error in form.caption.errors %}
+                    <span class="field-error">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <!-- Image upload with preview -->
+            <div class="form-group">
+                <label for="id_image">Image (optional)</label>
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('id_image').click()">
+                    <div class="upload-placeholder" id="uploadPlaceholder">
+                        <span class="upload-icon">📷</span>
+                        <p>Click to upload an image</p>
+                        <small>JPG, PNG, GIF</small>
+                    </div>
+                    <img src="" alt="Preview" class="upload-preview hidden" id="imagePreview" />
+                </div>
+                <input type="file" id="id_image" name="image" accept="image/*"
+                       class="hidden" onchange="previewPostImage(this)" />
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-large">Publish Post</button>
+                <a href="{% url 'home' %}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function previewPostImage(input) {
+    const preview  = document.getElementById('imagePreview');
+    const placeholder = document.getElementById('uploadPlaceholder');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+{% endblock %}

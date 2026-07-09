@@ -1,0 +1,84 @@
+{% extends 'core/base.html' %}
+{% block title %}Edit Profile – ConnectHub{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-card">
+
+        <div class="form-card-header">
+            <h1>Edit Profile</h1>
+            <p class="text-muted">Update your info and profile picture</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="styled-form">
+            {% csrf_token %}
+
+            <!-- Current profile picture preview -->
+            <div class="avatar-preview-wrapper">
+                {% if form.instance.profile_pic %}
+                    <img src="{{ form.instance.profile_pic.url }}" alt="Current Picture"
+                         class="avatar-xl" id="avatarPreview" />
+                {% else %}
+                    <div class="avatar-placeholder-xl" id="avatarPlaceholder">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <img src="" alt="" class="avatar-xl hidden" id="avatarPreview" />
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_first_name">First Name</label>
+                <input type="text" id="id_first_name" name="first_name"
+                       value="{{ form.first_name.value|default:'' }}"
+                       class="form-input" placeholder="First name" />
+            </div>
+
+            <div class="form-group">
+                <label for="id_last_name">Last Name</label>
+                <input type="text" id="id_last_name" name="last_name"
+                       value="{{ form.last_name.value|default:'' }}"
+                       class="form-input" placeholder="Last name" />
+            </div>
+
+            <div class="form-group">
+                <label for="id_bio">Bio</label>
+                <textarea id="id_bio" name="bio" class="form-input form-textarea"
+                          placeholder="Tell everyone about yourself..." rows="4">{{ form.bio.value|default:'' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="id_profile_pic">Profile Picture</label>
+                <input type="file" id="id_profile_pic" name="profile_pic"
+                       class="form-input file-input" accept="image/*"
+                       onchange="previewImage(this)" />
+                <small class="form-hint">JPG, PNG, GIF accepted. Leave blank to keep current.</small>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="{% url 'profile' user.username %}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Show a live preview of the chosen profile picture
+function previewImage(input) {
+    const preview = document.getElementById('avatarPreview');
+    const placeholder = document.getElementById('avatarPlaceholder');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+            if (placeholder) placeholder.style.display = 'none';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+{% endblock %}

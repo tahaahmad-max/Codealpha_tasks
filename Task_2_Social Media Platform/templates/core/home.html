@@ -1,0 +1,149 @@
+{% extends 'core/base.html' %}
+{% block title %}Home Feed – ConnectHub{% endblock %}
+
+{% block content %}
+<div class="feed-layout">
+
+    <!-- ── Left Sidebar ── -->
+    <aside class="sidebar-left">
+        {% if user.is_authenticated %}
+        <div class="sidebar-card">
+            <!-- Logged-in user's mini profile -->
+            <a href="{% url 'profile' user.username %}" class="sidebar-user-link">
+                {% with sp=user.profile %}
+                {% if sp and sp.profile_pic %}
+                    <img src="{{ sp.profile_pic.url }}" alt="{{ user.username }}" class="avatar-md" />
+                {% else %}
+                    <div class="avatar-placeholder-md">{{ user.username|first|upper }}</div>
+                {% endif %}
+                {% endwith %}
+                <div>
+                    <p class="sidebar-username">{{ user.username }}</p>
+                    <p class="sidebar-name">{{ user.get_full_name|default:"No name set" }}</p>
+                </div>
+            </a>
+            <hr class="divider" />
+            <a href="{% url 'create_post' %}" class="btn btn-primary btn-full">+ Create Post</a>
+            <a href="{% url 'profile' user.username %}" class="btn btn-outline btn-full" style="margin-top:8px">My Profile</a>
+        </div>
+        {% else %}
+        <div class="sidebar-card text-center">
+            <div class="welcome-icon">◈</div>
+            <h3>Welcome to ConnectHub</h3>
+            <p class="text-muted">Join us to share posts, follow people, and more!</p>
+            <a href="{% url 'register' %}" class="btn btn-primary btn-full">Sign Up Free</a>
+            <a href="{% url 'login' %}"    class="btn btn-outline btn-full" style="margin-top:8px">Login</a>
+        </div>
+        {% endif %}
+    </aside>
+
+    <!-- ── Main Feed ── -->
+    <section class="feed-main">
+        <div class="feed-header">
+            <h1 class="feed-title">Latest Posts</h1>
+        </div>
+
+        {% if posts %}
+            {% for post in posts %}
+            <article class="post-card" id="post-{{ post.id }}">
+
+                <!-- Post Header: avatar + username + date -->
+                <div class="post-header">
+                    <a href="{% url 'profile' post.author.username %}" class="post-author-link">
+                        {% with ap=post.author.profile %}
+                        {% if ap and ap.profile_pic %}
+                            <img src="{{ ap.profile_pic.url }}"
+                                 alt="{{ post.author.username }}" class="avatar-sm" />
+                        {% else %}
+                            <div class="avatar-placeholder-sm">{{ post.author.username|first|upper }}</div>
+                        {% endif %}
+                        {% endwith %}
+                        <div>
+                            <span class="post-username">{{ post.author.username }}</span>
+                            <span class="post-date">{{ post.created_at|timesince }} ago</span>
+                        </div>
+                    </a>
+
+                    {% if user == post.author %}
+                    <div class="post-menu">
+                        <button class="post-menu-btn" onclick="toggleMenu('menu-{{ post.id }}')">&#8943;</button>
+                        <div class="post-menu-dropdown" id="menu-{{ post.id }}">
+                            <a href="{% url 'edit_post' post.id %}">&#9998; Edit</a>
+                            <a href="{% url 'delete_post' post.id %}" class="danger">&#128465; Delete</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Post Image (optional) -->
+                {% if post.image %}
+                <div class="post-image-wrapper">
+                    <img src="{{ post.image.url }}" alt="Post image" class="post-image" loading="lazy" />
+                </div>
+                {% endif %}
+
+                <!-- Post Caption -->
+                <div class="post-body">
+                    <p class="post-caption">{{ post.caption }}</p>
+                </div>
+
+                <!-- Post Actions: like + comment -->
+                <div class="post-actions">
+                    {% if user.is_authenticated %}
+                    <button class="action-btn like-btn {% if post.id in liked_post_ids %}liked{% endif %}"
+                            data-post-id="{{ post.id }}"
+                            onclick="toggleLike({{ post.id }}, this)">
+                        <span class="like-icon">{% if post.id in liked_post_ids %}&#10084;{% else %}&#9825;{% endif %}</span>
+                        <span class="like-count" id="like-count-{{ post.id }}">{{ post.get_likes_count }}</span>
+                    </button>
+                    {% else %}
+                    <a href="{% url 'login' %}" class="action-btn">
+                        &#9825; <span>{{ post.get_likes_count }}</span>
+                    </a>
+                    {% endif %}
+
+                    <a href="{% url 'post_detail' post.id %}" class="action-btn comment-btn">
+                        &#128172; <span>{{ post.get_comments_count }}</span>
+                    </a>
+                </div>
+
+                <!-- Quick comment form -->
+                {% if user.is_authenticated %}
+                <div class="quick-comment">
+                    <form action="{% url 'add_comment' post.id %}" method="POST" class="comment-form-inline">
+                        {% csrf_token %}
+                        <input type="text" name="text" placeholder="Add a comment..." class="comment-input" required />
+                        <button type="submit" class="comment-submit">Post</button>
+                    </form>
+                </div>
+                {% endif %}
+
+            </article>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">&#128205;</div>
+                <h2>No posts yet!</h2>
+                <p>Be the first to share something.</p>
+                {% if user.is_authenticated %}
+                <a href="{% url 'create_post' %}" class="btn btn-primary">Create First Post</a>
+                {% else %}
+                <a href="{% url 'register' %}" class="btn btn-primary">Join ConnectHub</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </section>
+
+    <!-- ── Right Sidebar ── -->
+    <aside class="sidebar-right">
+        <div class="sidebar-card">
+            <h3 class="sidebar-heading">Find People</h3>
+            <form action="{% url 'search' %}" method="GET" class="sidebar-search-form">
+                <input type="text" name="q" placeholder="Search by username..." class="form-input" />
+                <button type="submit" class="btn btn-primary btn-full" style="margin-top:8px">Search</button>
+            </form>
+        </div>
+    </aside>
+
+</div>
+{% endblock %}

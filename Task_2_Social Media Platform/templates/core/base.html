@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="ConnectHub – A modern social media platform to share your moments." />
+    <title>{% block title %}ConnectHub{% endblock %}</title>
+
+    <!-- Google Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Our main CSS file -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- ════════════════════════════════════════════════
+         Navigation Bar
+    ════════════════════════════════════════════════ -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <!-- Brand Logo -->
+            <a href="{% url 'home' %}" class="nav-brand">
+                <span class="brand-icon">◈</span> ConnectHub
+            </a>
+
+            <!-- Search Bar (desktop) -->
+            <form class="nav-search" action="{% url 'search' %}" method="GET">
+                <input type="text" name="q" placeholder="Search users..." class="search-input"
+                       value="{{ request.GET.q|default:'' }}" />
+                <button type="submit" class="search-btn">🔍</button>
+            </form>
+
+            <!-- Nav Links -->
+            <div class="nav-links">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'home' %}" class="nav-link" title="Home">🏠</a>
+                    <a href="{% url 'create_post' %}" class="nav-link btn-create" title="Create Post">+ Post</a>
+                    <a href="{% url 'profile' user.username %}" class="nav-link nav-avatar" title="My Profile">
+                        {% with nav_profile=user.profile %}
+                        {% if nav_profile and nav_profile.profile_pic %}
+                            <img src="{{ nav_profile.profile_pic.url }}" alt="You" class="avatar-sm" />
+                        {% else %}
+                            <div class="avatar-placeholder-sm">{{ user.username|first|upper }}</div>
+                        {% endif %}
+                        {% endwith %}
+                        {{ user.username }}
+                    </a>
+                    <a href="{% url 'logout' %}" class="nav-link btn-logout" title="Logout">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}"    class="nav-link btn-login">Login</a>
+                    <a href="{% url 'register' %}" class="nav-link btn-register">Sign Up</a>
+                {% endif %}
+            </div>
+
+            <!-- Hamburger (mobile) -->
+            <button class="hamburger" id="hamburger" aria-label="Menu">☰</button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <form action="{% url 'search' %}" method="GET" class="mobile-search">
+                <input type="text" name="q" placeholder="Search users..." />
+                <button type="submit">🔍</button>
+            </form>
+            {% if user.is_authenticated %}
+                <a href="{% url 'home' %}"          class="mobile-link">🏠 Home</a>
+                <a href="{% url 'create_post' %}"   class="mobile-link">➕ Create Post</a>
+                <a href="{% url 'profile' user.username %}" class="mobile-link">👤 Profile</a>
+                <a href="{% url 'logout' %}"        class="mobile-link">🚪 Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}"    class="mobile-link">Login</a>
+                <a href="{% url 'register' %}" class="mobile-link">Sign Up</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- ════════════════════════════════════════════════
+         Flash Messages
+    ════════════════════════════════════════════════ -->
+    {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                    <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- ════════════════════════════════════════════════
+         Main Content
+    ════════════════════════════════════════════════ -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ════════════════════════════════════════════════
+         Footer
+    ════════════════════════════════════════════════ -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <span class="brand-icon">◈</span> ConnectHub
+                <p>Share your moments with the world.</p>
+            </div>
+            <div class="footer-links">
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'search' %}">Search</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'create_post' %}">Create Post</a>
+                    <a href="{% url 'profile' user.username %}">My Profile</a>
+                {% else %}
+                    <a href="{% url 'login' %}">Login</a>
+                    <a href="{% url 'register' %}">Register</a>
+                {% endif %}
+                <a href="/admin/">Admin</a>
+            </div>
+            <p class="footer-copy">&copy; 2024 ConnectHub. Built with Django &amp; &#10084;</p>
+        </div>
+    </footer>
+
+    <!-- Our main JavaScript file -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

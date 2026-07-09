@@ -1,0 +1,54 @@
+{% extends 'core/base.html' %}
+{% block title %}Search Results – ConnectHub{% endblock %}
+
+{% block content %}
+<div class="search-page">
+    <div class="search-header">
+        <h1>Search Users</h1>
+
+        <form action="{% url 'search' %}" method="GET" class="search-form-big">
+            <input type="text" name="q" value="{{ query }}"
+                   placeholder="Search by username..." class="form-input search-input-big"
+                   autofocus />
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+
+    {% if query %}
+        {% if results %}
+            <p class="search-count text-muted">{{ results|length }} user{{ results|length|pluralize }} found for "{{ query }}"</p>
+            <div class="users-grid">
+                {% for u in results %}
+                <a href="{% url 'profile' u.username %}" class="user-card-link">
+                    <div class="user-card">
+                        {% with srp=u.profile %}
+                        {% if srp and srp.profile_pic %}
+                            <img src="{{ srp.profile_pic.url }}" alt="{{ u.username }}" class="avatar-md" />
+                        {% else %}
+                            <div class="avatar-placeholder-md">{{ u.username|first|upper }}</div>
+                        {% endif %}
+                        {% endwith %}
+                        <div class="user-card-info">
+                            <p class="user-card-username">{{ u.username }}</p>
+                            <p class="user-card-name text-muted">{{ u.get_full_name|default:"" }}</p>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">&#128269;</div>
+                <h2>No users found</h2>
+                <p>Try a different username.</p>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">&#128101;</div>
+            <h2>Find People</h2>
+            <p>Type a username above to search for people on ConnectHub.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+{% block title %}Following – {{ profile_user.username }} – ConnectHub{% endblock %}
+
+{% block content %}
+<div class="list-page">
+    <div class="list-header">
+        <a href="{% url 'profile' profile_user.username %}" class="back-link">← Back to Profile</a>
+        <h1><span class="highlight">{{ profile_user.username }}</span> is Following</h1>
+        <p class="text-muted">{{ following|length }} user{{ following|length|pluralize }}</p>
+    </div>
+
+    {% if following %}
+    <div class="users-list">
+        {% for follow in following %}
+        <a href="{% url 'profile' follow.following.username %}" class="user-list-item">
+            {% with flgp=follow.following.profile %}
+            {% if flgp and flgp.profile_pic %}
+                <img src="{{ flgp.profile_pic.url }}"
+                     alt="{{ follow.following.username }}" class="avatar-md" />
+            {% else %}
+                <div class="avatar-placeholder-md">{{ follow.following.username|first|upper }}</div>
+            {% endif %}
+            {% endwith %}
+            <div class="user-list-info">
+                <p class="user-card-username">{{ follow.following.username }}</p>
+                <p class="text-muted">{{ follow.following.get_full_name|default:"" }}</p>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">&#128100;</div>
+        <p>Not following anyone yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

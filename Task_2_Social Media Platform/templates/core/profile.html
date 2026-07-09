@@ -1,0 +1,101 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ profile_user.username }}'s Profile – ConnectHub{% endblock %}
+
+{% block content %}
+<div class="profile-layout">
+
+    <!-- ── Profile Header Card ── -->
+    <div class="profile-header-card">
+
+        <!-- Avatar -->
+        <div class="profile-avatar-wrapper">
+            {% if profile_obj.profile_pic %}
+                <img src="{{ profile_obj.profile_pic.url }}"
+                     alt="{{ profile_user.username }}" class="avatar-xl" />
+            {% else %}
+                <div class="avatar-placeholder-xl">{{ profile_user.username|first|upper }}</div>
+            {% endif %}
+        </div>
+
+        <!-- User Info -->
+        <div class="profile-info">
+            <div class="profile-name-row">
+                <h1 class="profile-username">{{ profile_user.username }}</h1>
+
+                {% if user == profile_user %}
+                    <!-- Edit own profile -->
+                    <a href="{% url 'edit_profile' %}" class="btn btn-outline">✏️ Edit Profile</a>
+                {% elif user.is_authenticated %}
+                    <!-- Follow / Unfollow button -->
+                    <button class="btn {% if is_following %}btn-outline{% else %}btn-primary{% endif %} follow-btn"
+                            id="follow-btn-{{ profile_user.username }}"
+                            data-username="{{ profile_user.username }}"
+                            onclick="toggleFollow('{{ profile_user.username }}', this)">
+                        {% if is_following %}Unfollow{% else %}Follow{% endif %}
+                    </button>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-primary">Follow</a>
+                {% endif %}
+            </div>
+
+            <!-- Full Name & Bio -->
+            {% if profile_user.get_full_name %}
+                <p class="profile-full-name">{{ profile_user.get_full_name }}</p>
+            {% endif %}
+            {% if profile_obj.bio %}
+                <p class="profile-bio">{{ profile_obj.bio }}</p>
+            {% endif %}
+
+            <!-- Stats -->
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <span class="stat-number">{{ posts_count }}</span>
+                    <span class="stat-label">Posts</span>
+                </div>
+                <a href="{% url 'followers_list' profile_user.username %}" class="stat-item stat-link">
+                    <span class="stat-number" id="followers-count">{{ followers_count }}</span>
+                    <span class="stat-label">Followers</span>
+                </a>
+                <a href="{% url 'following_list' profile_user.username %}" class="stat-item stat-link">
+                    <span class="stat-number">{{ following_count }}</span>
+                    <span class="stat-label">Following</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Posts Grid ── -->
+    <div class="profile-posts-section">
+        <h2 class="section-title">Posts</h2>
+
+        {% if posts %}
+        <div class="posts-grid">
+            {% for post in posts %}
+            <a href="{% url 'post_detail' post.id %}" class="grid-post-link">
+                <div class="grid-post-card">
+                    {% if post.image %}
+                        <img src="{{ post.image.url }}" alt="Post" class="grid-post-img" loading="lazy" />
+                    {% else %}
+                        <div class="grid-post-text">{{ post.caption|truncatechars:100 }}</div>
+                    {% endif %}
+                    <div class="grid-post-overlay">
+                        <span>❤️ {{ post.get_likes_count }}</span>
+                        <span>💬 {{ post.get_comments_count }}</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📷</div>
+                <p>No posts yet.</p>
+                {% if user == profile_user %}
+                    <a href="{% url 'create_post' %}" class="btn btn-primary">Create Your First Post</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
