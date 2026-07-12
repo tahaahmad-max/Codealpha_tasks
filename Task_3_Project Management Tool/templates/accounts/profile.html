@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}My Profile - ProjectFlow{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="{% url 'dashboard' %}">Dashboard</a>
+  <span class="breadcrumb-sep">&#8250;</span>
+  <span>Profile</span>
+</div>
+
+<div style="max-width:700px;">
+  <div class="card">
+    <div class="card-header">
+      <div class="profile-header" style="margin-bottom:0;">
+        <div class="profile-avatar-big">
+          {% if request.user.profile.avatar %}
+            <img src="{{ request.user.profile.avatar.url }}" alt="avatar">
+          {% else %}
+            {{ request.user.username|first|upper }}
+          {% endif %}
+        </div>
+        <div>
+          <h2 style="font-size:20px;font-weight:800;">{{ request.user.get_full_name|default:request.user.username }}</h2>
+          <div style="color:var(--text-secondary);font-size:14px;">@{{ request.user.username }}</div>
+          <div style="color:var(--text-secondary);font-size:13px;margin-top:2px;">{{ request.user.email }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3 class="detail-section-title">Edit Profile</h3>
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          {% for field in user_form %}
+            <div class="form-group">
+              <label class="form-label">{{ field.label }}</label>
+              {{ field }}
+              {% if field.errors %}<div class="form-error">{{ field.errors.0 }}</div>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+        <hr class="divider">
+        {% for field in profile_form %}
+          <div class="form-group">
+            <label class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<div class="form-error">{{ field.errors.0 }}</div>{% endif %}
+          </div>
+        {% endfor %}
+        <div class="flex gap-2 mt-3">
+          <button type="submit" class="btn btn-primary">&#10003; Save Changes</button>
+          <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

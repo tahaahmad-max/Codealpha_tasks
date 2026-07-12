@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ project.name }} - ProjectFlow{% endblock %}
+{% block page_title %}{{ project.name }}{% endblock %}
+{% block extra_js %}<script src="{% static 'js/board.js' %}"></script>{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="{% url 'dashboard' %}">Dashboard</a>
+  <span class="breadcrumb-sep">&#8250;</span>
+  <span>{{ project.name }}</span>
+</div>
+
+<!-- Project Header -->
+<div class="flex items-center justify-between mb-3" style="flex-wrap:wrap;gap:10px;">
+  <div>
+    <p style="color:var(--text-secondary);font-size:14px;max-width:500px;">{{ project.description }}</p>
+    <div style="display:flex;gap:12px;margin-top:8px;font-size:13px;color:var(--text-secondary);">
+      <span>&#128100; Owner: <strong>{{ project.owner.get_full_name|default:project.owner.username }}</strong></span>
+      <span>&#128203; {{ project.get_task_count }} tasks</span>
+      <span>&#128100; {{ project.get_member_count }} members</span>
+    </div>
+  </div>
+  <div class="flex gap-2" style="flex-wrap:wrap;">
+    <a href="{% url 'task_create' project.pk %}?status=todo" class="btn btn-primary btn-sm">&#10133; Add Task</a>
+    {% if is_owner %}
+      <a href="{% url 'manage_members' project.pk %}" class="btn btn-secondary btn-sm">&#128100; Members</a>
+      <a href="{% url 'project_edit' project.pk %}" class="btn btn-secondary btn-sm">&#9998; Edit</a>
+      <a href="{% url 'project_delete' project.pk %}" class="btn btn-danger btn-sm" data-confirm="Delete this project and ALL its tasks?">&#128465; Delete</a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Kanban Board -->
+<div class="board">
+
+  <!-- TO DO -->
+  <div class="column col-todo">
+    <div class="column-header">
+      <div class="column-title"><span class="column-dot"></span> To Do</div>
+      <span class="column-count">{{ todo_tasks.count }}</span>
+    </div>
+    <div class="column-body" data-status="todo">
+      {% for task in todo_tasks %}
+        <div class="task-card {{ task.get_priority_color }} fade-in" draggable="true" data-task-id="{{ task.pk }}">
+          <div class="task-card-title">{{ task.title }}</div>
+          {% if task.description %}<div class="task-card-desc">{{ task.description }}</div>{% endif %}
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+            <span class="badge badge-{{ task.priority }}">{{ task.get_priority_display }}</span>
+            {% if task.due_date %}<span class="badge" style="background:#f3f4f6;color:#374151;">&#128197; {{ task.due_date }}</span>{% endif %}
+          </div>
+          <div class="task-card-footer">
+            {% if task.assigned_to %}
+              <span style="font-size:12px;color:var(--text-secondary);">&#128100; {{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</span>
+            {% else %}
+              <span style="font-size:12px;color:var(--text-light);">Unassigned</span>
+            {% endif %}
+            <div class="task-card-actions">
+              <a href="{% url 'task_detail' task.pk %}" class="btn btn-secondary btn-sm btn-icon" title="View">&#128065;</a>
+              <a href="{% url 'task_edit' task.pk %}" class="btn btn-secondary btn-sm btn-icon" title="Edit">&#9998;</a>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div style="text-align:center;padding:24px;color:var(--text-light);font-size:13px;">No tasks here</div>
+      {% endfor %}
+      <a href="{% url 'task_create' project.pk %}?status=todo" class="btn btn-secondary btn-sm" style="justify-content:center;border-style:dashed;">&#10133; Add task</a>
+    </div>
+  </div>
+
+  <!-- IN PROGRESS -->
+  <div class="column col-inprogress">
+    <div class="column-header">
+      <div class="column-title"><span class="column-dot"></span> In Progress</div>
+      <span class="column-count">{{ inprogress_tasks.count }}</span>
+    </div>
+    <div class="column-body" data-status="inprogress">
+      {% for task in inprogress_tasks %}
+        <div class="task-card {{ task.get_priority_color }} fade-in" draggable="true" data-task-id="{{ task.pk }}">
+          <div class="task-card-title">{{ task.title }}</div>
+          {% if task.description %}<div class="task-card-desc">{{ task.description }}</div>{% endif %}
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+            <span class="badge badge-{{ task.priority }}">{{ task.get_priority_display }}</span>
+            {% if task.due_date %}<span class="badge" style="background:#f3f4f6;color:#374151;">&#128197; {{ task.due_date }}</span>{% endif %}
+          </div>
+          <div class="task-card-footer">
+            {% if task.assigned_to %}
+              <span style="font-size:12px;color:var(--text-secondary);">&#128100; {{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</span>
+            {% else %}
+              <span style="font-size:12px;color:var(--text-light);">Unassigned</span>
+            {% endif %}
+            <div class="task-card-actions">
+              <a href="{% url 'task_detail' task.pk %}" class="btn btn-secondary btn-sm btn-icon">&#128065;</a>
+              <a href="{% url 'task_edit' task.pk %}" class="btn btn-secondary btn-sm btn-icon">&#9998;</a>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div style="text-align:center;padding:24px;color:var(--text-light);font-size:13px;">No tasks here</div>
+      {% endfor %}
+      <a href="{% url 'task_create' project.pk %}?status=inprogress" class="btn btn-secondary btn-sm" style="justify-content:center;border-style:dashed;">&#10133; Add task</a>
+    </div>
+  </div>
+
+  <!-- DONE -->
+  <div class="column col-done">
+    <div class="column-header">
+      <div class="column-title"><span class="column-dot"></span> Completed</div>
+      <span class="column-count">{{ done_tasks.count }}</span>
+    </div>
+    <div class="column-body" data-status="done">
+      {% for task in done_tasks %}
+        <div class="task-card {{ task.get_priority_color }} fade-in" draggable="true" data-task-id="{{ task.pk }}" style="opacity:0.75;">
+          <div class="task-card-title" style="text-decoration:line-through;">{{ task.title }}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+            <span class="badge badge-{{ task.priority }}">{{ task.get_priority_display }}</span>
+          </div>
+          <div class="task-card-footer">
+            {% if task.assigned_to %}
+              <span style="font-size:12px;color:var(--text-secondary);">&#128100; {{ task.assigned_to.username }}</span>
+            {% else %}
+              <span style="font-size:12px;color:var(--text-light);">Unassigned</span>
+            {% endif %}
+            <div class="task-card-actions">
+              <a href="{% url 'task_detail' task.pk %}" class="btn btn-secondary btn-sm btn-icon">&#128065;</a>
+              <a href="{% url 'task_edit' task.pk %}" class="btn btn-secondary btn-sm btn-icon">&#9998;</a>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div style="text-align:center;padding:24px;color:var(--text-light);font-size:13px;">No tasks here</div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

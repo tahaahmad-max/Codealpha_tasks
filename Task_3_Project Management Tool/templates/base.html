@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}ProjectFlow{% endblock %}</title>
+  <meta name="description" content="ProjectFlow - Manage your projects and tasks efficiently">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="{% url 'dashboard' %}" class="brand-logo">
+        <div class="brand-icon">&#128203;</div>
+        <span class="brand-name">ProjectFlow</span>
+      </a>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Main</div>
+      <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+        <span class="nav-icon">&#127968;</span> Dashboard
+      </a>
+      <a href="{% url 'project_create' %}" class="nav-link {% if request.resolver_match.url_name == 'project_create' %}active{% endif %}">
+        <span class="nav-icon">&#10133;</span> New Project
+      </a>
+
+      <div class="nav-section-title">Account</div>
+      <a href="{% url 'notifications' %}" class="nav-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}">
+        <span class="nav-icon">&#128276;</span> Notifications
+        {% if unread_count %}
+          <span class="notif-badge" style="position:static;width:auto;padding:1px 6px;border-radius:20px;font-size:10px;">{{ unread_count }}</span>
+        {% endif %}
+      </a>
+      <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+        <span class="nav-icon">&#128100;</span> My Profile
+      </a>
+      <a href="{% url 'logout' %}" class="nav-link">
+        <span class="nav-icon">&#128682;</span> Logout
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info-sidebar">
+        <div class="user-avatar">
+          {% if request.user.profile.avatar %}
+            <img src="{{ request.user.profile.avatar.url }}" alt="avatar">
+          {% else %}
+            {{ request.user.username|first|upper }}
+          {% endif %}
+        </div>
+        <div class="user-meta">
+          <div class="user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+          <div class="user-role">@{{ request.user.username }}</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Mobile overlay -->
+  <div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:99;" onclick="document.querySelector('.sidebar').classList.remove('open');this.style.display='none';"></div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Navbar -->
+    <header class="navbar">
+      <div class="navbar-left">
+        <button class="btn-hamburger" id="hamburger" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').style.display='block';">&#9776;</button>
+        <span class="page-title">{% block page_title %}Dashboard{% endblock %}</span>
+      </div>
+      <div class="navbar-right">
+        <a href="{% url 'notifications' %}" class="notif-btn">
+          &#128276;
+          {% if unread_count %}<span class="notif-badge">{{ unread_count }}</span>{% endif %}
+        </a>
+        <a href="{% url 'profile' %}" class="user-avatar" style="border:2px solid var(--border);">
+          {% if request.user.profile.avatar %}
+            <img src="{{ request.user.profile.avatar.url }}" alt="avatar">
+          {% else %}
+            {{ request.user.username|first|upper }}
+          {% endif %}
+        </a>
+      </div>
+    </header>
+
+    <!-- Messages -->
+    <div style="padding: 0 28px;">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} mt-3 fade-in">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Page Content -->
+    <main class="page-content fade-in">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+      &copy; 2024 ProjectFlow &mdash; Built with Django &amp; &#10084;
+    </footer>
+  </div>
+</div>
+
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

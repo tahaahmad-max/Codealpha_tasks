@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} Task - ProjectFlow{% endblock %}
+{% block page_title %}{{ action }} Task{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="{% url 'dashboard' %}">Dashboard</a>
+  <span class="breadcrumb-sep">&#8250;</span>
+  <a href="{% url 'project_detail' project.pk %}">{{ project.name }}</a>
+  <span class="breadcrumb-sep">&#8250;</span>
+  <span>{{ action }} Task</span>
+</div>
+
+<div style="max-width:580px;">
+  <div class="card">
+    <div class="card-header">
+      <h2 style="font-size:18px;font-weight:700;">
+        {% if action == 'Create' %}&#10133; New Task{% else %}&#9998; Edit Task{% endif %}
+      </h2>
+      <span style="font-size:13px;color:var(--text-secondary);">Project: {{ project.name }}</span>
+    </div>
+    <div class="card-body">
+      <form method="POST">
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="form-group">
+            <label class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<div class="form-error">{{ field.errors.0 }}</div>{% endif %}
+          </div>
+        {% endfor %}
+        <div class="flex gap-2 mt-3">
+          <button type="submit" class="btn btn-primary">
+            {% if action == 'Create' %}&#10133; Create Task{% else %}&#10003; Save Changes{% endif %}
+          </button>
+          {% if task %}
+            <a href="{% url 'task_detail' task.pk %}" class="btn btn-secondary">Cancel</a>
+          {% else %}
+            <a href="{% url 'project_detail' project.pk %}" class="btn btn-secondary">Cancel</a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

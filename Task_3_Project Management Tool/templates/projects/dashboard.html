@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard - ProjectFlow{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stats -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon purple">&#128203;</div>
+    <div>
+      <div class="stat-value">{{ projects.count }}</div>
+      <div class="stat-label">Total Projects</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green">&#127381;</div>
+    <div>
+      <div class="stat-value">{{ owned_count }}</div>
+      <div class="stat-label">Owned by Me</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon amber">&#128203;</div>
+    <div>
+      <div class="stat-value">{{ request.user.assigned_tasks.count }}</div>
+      <div class="stat-label">My Tasks</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon red">&#128276;</div>
+    <div>
+      <div class="stat-value">{{ unread_count|default:0 }}</div>
+      <div class="stat-label">Notifications</div>
+    </div>
+  </div>
+</div>
+
+<!-- Projects Header -->
+<div class="flex items-center justify-between mb-3">
+  <h2 style="font-size:18px;font-weight:700;">My Projects</h2>
+  <a href="{% url 'project_create' %}" class="btn btn-primary">
+    &#10133; New Project
+  </a>
+</div>
+
+<!-- Projects Grid -->
+{% if projects %}
+<div class="projects-grid">
+  {% for project in projects %}
+  <div class="project-card fade-in">
+    <div class="project-card-bar"></div>
+    <div class="project-card-header">
+      <h3 class="project-card-title">{{ project.name }}</h3>
+      <p class="project-card-desc">{{ project.description|default:"No description provided." }}</p>
+      <div class="project-card-meta">
+        <span class="meta-item">&#128203; {{ project.get_task_count }} task{{ project.get_task_count|pluralize }}</span>
+        <span class="meta-item">&#128100; {{ project.get_member_count }} member{{ project.get_member_count|pluralize }}</span>
+        {% if project.owner == request.user %}
+          <span class="badge badge-admin">Owner</span>
+        {% else %}
+          <span class="badge badge-member">Member</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="project-card-footer">
+      <a href="{% url 'project_detail' project.pk %}" class="btn btn-primary btn-sm">&#128065; View Board</a>
+      {% if project.owner == request.user %}
+        <a href="{% url 'project_edit' project.pk %}" class="btn btn-secondary btn-sm">&#9998; Edit</a>
+        <a href="{% url 'manage_members' project.pk %}" class="btn btn-secondary btn-sm">&#128100;</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">
+  <div class="empty-state">
+    <div class="empty-icon">&#128203;</div>
+    <h3>No projects yet</h3>
+    <p>Create your first project to get started!</p>
+    <a href="{% url 'project_create' %}" class="btn btn-primary mt-3">&#10133; Create Project</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

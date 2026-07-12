@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Delete Project - ProjectFlow{% endblock %}
+{% block page_title %}Delete Project{% endblock %}
+
+{% block content %}
+<div style="max-width:480px;">
+  <div class="card">
+    <div class="card-body" style="text-align:center;padding:40px;">
+      <div style="font-size:52px;margin-bottom:16px;">&#9888;&#65039;</div>
+      <h2 style="font-size:20px;font-weight:800;margin-bottom:8px;">Delete Project?</h2>
+      <p style="color:var(--text-secondary);margin-bottom:24px;">
+        Are you sure you want to delete <strong>"{{ project.name }}"</strong>?<br>
+        This will permanently delete all tasks and data associated with it.
+      </p>
+      <form method="POST" style="display:flex;gap:12px;justify-content:center;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">&#128465; Yes, Delete</button>
+        <a href="{% url 'project_detail' project.pk %}" class="btn btn-secondary">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

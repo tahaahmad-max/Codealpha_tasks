@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Members - {{ project.name }}{% endblock %}
+{% block page_title %}Members{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="{% url 'dashboard' %}">Dashboard</a>
+  <span class="breadcrumb-sep">&#8250;</span>
+  <a href="{% url 'project_detail' project.pk %}">{{ project.name }}</a>
+  <span class="breadcrumb-sep">&#8250;</span>
+  <span>Members</span>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start;">
+
+  <!-- Member List -->
+  <div class="card">
+    <div class="card-header">
+      <h2 style="font-size:16px;font-weight:700;">&#128100; Project Members</h2>
+    </div>
+    <div class="card-body">
+      <div class="members-list">
+        <!-- Owner -->
+        <div class="member-row">
+          <div class="member-avatar">
+            {% if project.owner.profile.avatar %}<img src="{{ project.owner.profile.avatar.url }}" alt="">
+            {% else %}{{ project.owner.username|first|upper }}{% endif %}
+          </div>
+          <div class="member-info">
+            <div class="member-name">{{ project.owner.get_full_name|default:project.owner.username }}</div>
+            <div class="member-username">@{{ project.owner.username }}</div>
+          </div>
+          <span class="badge badge-admin">Owner</span>
+        </div>
+        <!-- Members -->
+        {% for m in members %}
+        <div class="member-row">
+          <div class="member-avatar">
+            {% if m.user.profile.avatar %}<img src="{{ m.user.profile.avatar.url }}" alt="">
+            {% else %}{{ m.user.username|first|upper }}{% endif %}
+          </div>
+          <div class="member-info">
+            <div class="member-name">{{ m.user.get_full_name|default:m.user.username }}</div>
+            <div class="member-username">@{{ m.user.username }}</div>
+          </div>
+          <span class="badge badge-{{ m.role }}">{{ m.get_role_display }}</span>
+          <a href="{% url 'remove_member' project.pk m.user.pk %}" class="btn btn-danger btn-sm btn-icon" data-confirm="Remove {{ m.user.username }} from this project?" title="Remove">&#10005;</a>
+        </div>
+        {% empty %}
+          <p style="color:var(--text-secondary);font-size:14px;">No additional members yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Member -->
+  <div class="card">
+    <div class="card-header">
+      <h2 style="font-size:16px;font-weight:700;">&#10133; Add Member</h2>
+    </div>
+    <div class="card-body">
+      <form method="POST">
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="form-group">
+            <label class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<div class="form-error">{{ field.errors.0 }}</div>{% endif %}
+          </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary w-full" style="justify-content:center;">Add Member</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

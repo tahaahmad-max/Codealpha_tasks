@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} Project - ProjectFlow{% endblock %}
+{% block page_title %}{{ action }} Project{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="{% url 'dashboard' %}">Dashboard</a>
+  <span class="breadcrumb-sep">&#8250;</span>
+  {% if project %}<a href="{% url 'project_detail' project.pk %}">{{ project.name }}</a>
+  <span class="breadcrumb-sep">&#8250;</span>{% endif %}
+  <span>{{ action }} Project</span>
+</div>
+
+<div style="max-width:560px;">
+  <div class="card">
+    <div class="card-header">
+      <h2 style="font-size:18px;font-weight:700;">
+        {% if action == 'Create' %}&#10133; New Project{% else %}&#9998; Edit Project{% endif %}
+      </h2>
+    </div>
+    <div class="card-body">
+      <form method="POST">
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="form-group">
+            <label class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<div class="form-error">{{ field.errors.0 }}</div>{% endif %}
+          </div>
+        {% endfor %}
+        <div class="flex gap-2 mt-3">
+          <button type="submit" class="btn btn-primary">
+            {% if action == 'Create' %}&#10133; Create Project{% else %}&#10003; Save Changes{% endif %}
+          </button>
+          {% if project %}
+            <a href="{% url 'project_detail' project.pk %}" class="btn btn-secondary">Cancel</a>
+          {% else %}
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

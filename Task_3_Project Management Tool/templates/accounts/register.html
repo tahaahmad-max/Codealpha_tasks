@@ -1,0 +1,23 @@
+{% extends 'base_auth.html' %}
+{% block title %}Register - ProjectFlow{% endblock %}
+{% block subtitle %}Create your free account{% endblock %}
+
+{% block auth_content %}
+<form method="POST">
+  {% csrf_token %}
+  {% for field in form %}
+    <div class="form-group">
+      <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}<div class="form-error">{{ field.errors.0 }}</div>{% endif %}
+      {% if field.help_text %}<div class="form-help">{{ field.help_text }}</div>{% endif %}
+    </div>
+  {% endfor %}
+  <button type="submit" class="btn btn-primary w-full mt-2" style="justify-content:center;">
+    &#127881; Create Account
+  </button>
+</form>
+<div class="auth-footer">
+  Already have an account? <a href="{% url 'login' %}">Sign in</a>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Notifications - ProjectFlow{% endblock %}
+{% block page_title %}Notifications{% endblock %}
+
+{% block content %}
+<div style="max-width:700px;">
+  <div class="card">
+    <div class="card-header">
+      <h2 style="font-size:16px;font-weight:700;">&#128276; All Notifications</h2>
+      <span style="font-size:13px;color:var(--text-secondary);">{{ notifications.count }} total</span>
+    </div>
+    <div class="card-body">
+      {% if notifications %}
+      <div class="notif-list">
+        {% for notif in notifications %}
+        <div class="notif-item {% if not notif.is_read %}unread{% else %}read{% endif %}">
+          <div class="notif-dot"></div>
+          <div style="flex:1;">
+            <div class="notif-message">{{ notif.message }}</div>
+            <div class="notif-time">{{ notif.created_at|timesince }} ago</div>
+            {% if notif.task %}
+              <a href="{% url 'task_detail' notif.task.pk %}" class="notif-link">View Task &#8250;</a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">&#128276;</div>
+        <h3>No notifications</h3>
+        <p>You're all caught up!</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
